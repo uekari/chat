@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>chatApp</title>
+  <style>
+    #output li {
+      background: #ccc;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>realtime chat</h1>
+
+  <!-- 入力場所を作成 -->
+  <!-- 送信時にidを指定して入力した値を取得するため、inputタグ2つとbuttonにidを指定する -->
+  <form>
+    <fieldset>
+      <legend>チャット入力画面</legend>
+      <div>
+        name: <input type="text" id="name">
+      </div>
+      <div>
+        text: <input type="text" id="text">
+      </div>
+      <div>
+        <button type="button" id="send">send</button>
+      </div>
+    </fieldset>
+  </form>
+
+  <!-- データ出力場所 -->
+  <ul id="output"></ul>
+
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+  <script>
+
+    // 時刻変換関数（日時をいい感じの形式にする関数）
+    function convertTimestampToDatetime(timestamp) {
+      const _d = timestamp ? new Date(timestamp * 1000) : new Date();
+      const Y = (_d.getFullYear() - 1969);
+      const m = (_d.getMonth() + 1).toString().padStart(2, '0');
+      const d = _d.getDate().toString().padStart(2, '0');
+      const H = _d.getHours().toString().padStart(2, '0');
+      const i = _d.getMinutes().toString().padStart(2, '0');
+      const s = _d.getSeconds().toString().padStart(2, '0');
+      return `${Y}/${m}/${d} ${H}:${i}:${s}`;
+    }
+
+  </script>
+
+
+  <!-- 以下にfirebaseのコードを貼り付けよう -->
+
+
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.13.0/firebase-app.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      serverTimestamp,
+      query,
+      orderBy,
+      onSnapshot,
+    } from "https://www.gstatic.com/firebasejs/9.13.0/firebase-firestore.js";
+
+    // 
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTHyhwQhwCBdKgykuVWvvUNPNevISwX6M",
+      authDomain: "chat-app-test-60917.firebaseapp.com",
+      projectId: "chat-app-test-60917",
+      storageBucket: "chat-app-test-60917.appspot.com",
+      messagingSenderId: "927932714572",
+      appId: "1:927932714572:web:c5594302a56d4dbb78eee9"
+    };
+    const app = initializeApp(firebaseConfig);
+    // 自分のアプリとFirestoreを繋ぐ
+    const db = getFirestore(app);
+
+
+    // sendボタンをクリックしたとき・・・
+    $("#send").on("click", function () {
+      // console.log($("#name").val());
+      // console.log($("#text").val());
+
+      const postData = {
+        name: $("#name").val(),
+        text: $("#text").val(),
+        time: serverTimestamp(),
+      };
+
+      // どこに保存するか？
+      // → db：getFirestore の chat に保存）
+      addDoc(collection(db, "chat"), postData);
+      $("#text").val("");
+    });
+
+
+    // import に query と otherBy を追記して・・・
+
+
+
+    // データ取得の参照先を決め、条件を指定する（ここでは時間の新しい順に並び替え）
+    const q = query(collection(db, "chat"), orderBy("time", "desc"));
+    // リアルタイムのデータを全部返してもらい、
+    onSnapshot(q, (querySnapshot) => {
+      console.log(querySnapshot);
+
+
+      // ①データの取得処理
+      // onSnapshotの db の"chat" にあるデータを、querySnapshot
+      // onSnapshot(collection(db, "chat"), (querySnapshot) => {
+      // querySnapshotのdocsにある要素をコンソールに表示
+      console.log(querySnapshot.docs);
+
+      // ②データの取り出し
+      // documentsという空の配列を作る
+      const documents = [];
+      // querySnapshot の docs から各要素を出力する
+      querySnapshot.docs.forEach(function (doc) {
+        console.log(doc);
+        const document = {
+          // docの中のidとdataを取得
+          id: doc.id,
+          data: doc.data(),
+        };
+        documents.push(document);
+      });
+
+      // コンソールに表示
+      console.log(documents);
+
+
+      // ③画面表示するためのタグを生成する
+      // htmlElements という空の配列を作る 
+      const htmlElements = [];
+      // 上記の documents の各要素を htmlElements に出力する
+      // また、時刻形式を変換（19911110 ではなく 1991/11/10へ）
+      documents.forEach(function (document) {
+        htmlElements.push(`
+        <li id="${document.id}">
+          <p>${document.data.name}</p>
+          <p>${convertTimestampToDatetime(document.data.time)}</p>
+          <p>${document.data.text}</p>
+        </li>
+      `);
+      });
+
+
+      // 各要素を”output”に出力する
+      $("#output").html(htmlElements);
+
+    });
+
+
+  </script>
+
+
+</body>
+
+</html>

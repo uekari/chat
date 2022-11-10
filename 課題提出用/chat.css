@@ -1,0 +1,44 @@
+header {
+    text-align: center;
+}
+
+h1 {
+    text-align: center;
+}
+
+.top_img {
+    text-align: center;
+}
+
+.top_img img {
+    width: 200px;
+}
+
+.name {
+    text-align: center;
+    margin: 20px 0px;
+}
+
+.main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.left {
+    width: 50%;
+    text-align: center;
+}
+
+.right {
+    width: 50%;
+    text-align: center;
+}
+
+.button2 {
+    text-align: unset;
+}
+
+ul {
+    list-style: none
+}

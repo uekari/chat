@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/課題提出用/新規登録.css">
+    <title> Chat_新規登録ページ</title>
+</head>
+
+<body>
+
+    <form>
+        <div class="form">
+            <fieldset>
+                <legend>Googleアカウントで<br>登録しますか？</legend>
+                <div class="button">
+                    <button type="button" id="send"> 登録 </button>
+                </div>
+            </fieldset>
+        </div>
+
+        <div>
+            <p id="output"></p>
+        </div>
+    </form>
+
+    <form>
+        <div class="form2">
+            <fieldset>
+                <legend>Google以外で登録の方は<br>こちらから ↓</legend>
+                <div class="button">
+                    <button type="button" id="send"> 登録 </button>
+                </div>
+            </fieldset>
+        </div>
+
+        <div>
+            <p id="output"></p>
+        </div>
+    </form>
+
+
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <script type="module">
+
+        // 接続情報をデータベースに保存する1文。データの追加や取得ができるようになる．
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.13.0/firebase-app.js";
+
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+
+        // 上記のバージョンと同じ数字に書き換えが必要
+        import {
+            getFirestore,
+            collection,
+            addDoc,
+            serverTimestamp,
+            // 下記3つは追加・・・なぜ？
+            query,
+            orderBy,
+            onSnapshot,
+        } from "https://www.gstatic.com/firebasejs/9.13.0/firebase-firestore.js";
+
+        import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.13.0/firebase-auth.js"
+
+        // Firebaseの設定
+        const firebaseConfig = {
+            apiKey: "AIzaSyDOdd7HaWxGKm4yfPOkQ7xMR5BGl8qbHpI",
+            authDomain: "chat-3a761.firebaseapp.com",
+            projectId: "chat-3a761",
+            storageBucket: "chat-3a761.appspot.com",
+            messagingSenderId: "30739102419",
+            appId: "1:30739102419:web:f60c341749d28633cef226"
+        };
+
+        // Appを初期化・・・？
+        const app = initializeApp(firebaseConfig);
+
+        // 自分のアプリとFirestoreを繋ぐ1文
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+
+        // ここから、送信ボタンをクリックしたときにデータを送信する処理を書いていく
+        $("#send").on("click", function (e) {
+
+            e.preventDefault();
+            // console.log($("#ID").val());
+            // console.log($("#password").val());
+
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    // This gives you a Google Access Token. You can use it to access the Google API.
+                    const credential = GoogleAuthProvider.credentialFromResult(result);
+                    const token = credential.accessToken;
+                    // The signed-in user info.
+                    const user = result.user;
+                    window.location.href = "http://127.0.0.1:5500/%E8%AA%B2%E9%A1%8C%E6%8F%90%E5%87%BA%E7%94%A8/chat.html"
+                    // ...
+                }).catch((error) => {
+                    // Handle Errors here.
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    // The email of the user's account used.
+                    const email = error.customData.email;
+                    // The AuthCredential type that was used.
+                    const credential = GoogleAuthProvider.credentialFromError(error);
+                    // ...
+                });
+
+            // const postData = {
+            //     mail: $("#mail").val(),
+            //     pass: $("#pass").val(),
+            //     time: serverTimestamp(),
+            // };
+
+            // // db の chat に保存
+            // addDoc(collection(db, "chat"), postData);
+
+            // $("#output").text("登録完了！")
+
+        });
+
+
+    </script>
+
+</body>
+
+</html>

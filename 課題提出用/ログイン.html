@@ -1,0 +1,35 @@
+<script>
+
+    import { GoogleAuthProvider } from "firebase/auth";
+
+    const provider = new GoogleAuthProvider();
+
+    provider.addScope('https://www.googleapis.com/auth/contacts.readonly');
+
+
+
+
+
+
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "firebase/app";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyDOdd7HaWxGKm4yfPOkQ7xMR5BGl8qbHpI",
+        authDomain: "chat-3a761.firebaseapp.com",
+        projectId: "chat-3a761",
+        storageBucket: "chat-3a761.appspot.com",
+        messagingSenderId: "30739102419",
+        appId: "1:30739102419:web:f60c341749d28633cef226"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+
+
+
+
+</script>

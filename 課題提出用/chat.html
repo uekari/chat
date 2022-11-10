@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <link rel="stylesheet" href="/課題提出用/chat.css">
+
+    <style>
+        #output li {
+            background: rgba(204, 204, 204, 0.674);
+        }
+
+        #output2 li {
+            background: rgba(204, 204, 204, 0.674);
+        }
+    </style>
+
+</head>
+
+
+<body>
+
+    <!-- 入力する場所を表示するとこ -->
+    <h1>シフト管理</h1>
+    <div class="top_img">
+        <img src="/課題提出用/IMG_9500.JPG" alt="top">
+    </div>
+
+    <div class="name">
+        名前：<select id="name" name="name">
+            <option value=""> 未選択 </option>
+            <option>美也子</option>
+            <option>遥</option>
+            <option>奈智</option>
+            <option>奈美江</option>
+            <option>チャン</option>
+            <option>チン</option>
+            <option>未希子</option>
+            <option>知美</option>
+            <option>一景</option>
+            <option>心颯</option>
+        </select>
+    </div>
+
+    <div class="main">
+        <form class="left">
+            <div class="button">
+                <button type="button" id="in">出勤</button>
+                <div>
+                    <ul id="output"></ul>
+                </div>
+            </div>
+        </form>
+        <div class="right">
+            <div class="button">
+                <button type="button" id="out">退勤</button>
+                <div>
+                    <ul id="output2"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <script>
+
+        // 時刻変換関数(ここはそのままコピー)
+        function convertTimestampToDatetime(timestamp) {
+            const _d = timestamp ? new Date(timestamp * 1000) : new Date();
+            const Y = (_d.getFullYear() - 1969);
+            const m = (_d.getMonth() + 1).toString().padStart(2, '0');
+            const d = _d.getDate().toString().padStart(2, '0');
+            const H = _d.getHours().toString().padStart(2, '0');
+            const i = _d.getMinutes().toString().padStart(2, '0');
+            const s = _d.getSeconds().toString().padStart(2, '0');
+            return `${Y}/${m}/${d} ${H}:${i}:${s}`;
+        }
+
+    </script>
+
+    <!-- ここからデータ送信の処理を書いていく -->
+    <!-- Firebaseのコードを貼り付け(ここはほぼコピー) -->
+
+    <script type="module">
+
+        // 接続情報をデータベースに保存する1文。データの追加や取得ができるようになる．
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.13.0/firebase-app.js";
+
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+
+        // 上記のバージョンと同じ数字に書き換えが必要
+        import {
+            getFirestore,
+            collection,
+            addDoc,
+            serverTimestamp,
+            // 下記3つは追加・・・なぜ？
+            query,
+            orderBy,
+            onSnapshot,
+        } from "https://www.gstatic.com/firebasejs/9.13.0/firebase-firestore.js";
+
+        import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.13.0/firebase-auth.js"
+
+        // Firebaseの設定
+        const firebaseConfig = {
+            apiKey: "AIzaSyDOdd7HaWxGKm4yfPOkQ7xMR5BGl8qbHpI",
+            authDomain: "chat-3a761.firebaseapp.com",
+            projectId: "chat-3a761",
+            storageBucket: "chat-3a761.appspot.com",
+            messagingSenderId: "30739102419",
+            appId: "1:30739102419:web:f60c341749d28633cef226"
+        };
+
+        // Appを初期化・・・？
+        const app = initializeApp(firebaseConfig);
+
+        // 自分のアプリとFirestoreを繋ぐ1文
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+
+        // ここから、出勤ボタンをクリックしたときにデータを送信する処理を書いていく
+        $("#in").on("click", function () {
+
+            const postData = {
+                name: $("#name").val(),
+                time: serverTimestamp(),
+            };
+
+            console.log($("#name").val())
+
+            // db の chat に保存
+            addDoc(collection(db, "chat"), postData);
+
+        });
+
+        $("#out").on("click", function () {
+
+            const postData = {
+                name: $("#name").val(),
+                time: serverTimestamp(),
+            };
+
+            console.log($("#name").val())
+
+            // db の chat に保存
+            addDoc(collection(db, "chat"), postData);
+
+        });
+
+
+
+
+        // データ取得参照先を決め、条件を指定する
+        const q = query(collection(db, "chat"), orderBy("time", "desc"));
+        // リアルタイムのデータを全部返してもらい、
+        onSnapshot(q, (querySnapshot) => {
+            console.log(querySnapshot);
+
+            // onSnapshotの db の"chat" にあるデータを、querySnapshot
+            // onSnapshot(collection(db, "chat"), (querySnapshot) => {
+            console.log(querySnapshot.docs);
+
+            // ②データの取り出し
+            // documentsという空の配列を作る
+            const documents = [];
+            // querySnapshot の docs から各要素を出力する
+            querySnapshot.docs.forEach(function (doc) {
+                console.log(doc);
+                const document = {
+                    // docの中のidとdataを取得
+                    id: doc.id,
+                    data: doc.data(),
+                };
+                documents.push(document);
+            });
+
+            console.log(documents);
+
+            // ③画面表示するためのタグを生成する
+            // htmlElements という空の配列を作る 
+            const htmlElements = [];
+            // 上記の documents の各要素を htmlElements に出力する
+            // また、時刻形式を変換（19911110 ではなく 1991/11/10へ）
+            documents.forEach(function (document) {
+                htmlElements.push(`
+                    <li id="${document.id}">
+                        <p>${document.data.name}</p>
+                        <p>${convertTimestampToDatetime(document.data.time)}</p>
+                    </li>
+                `);
+            });
+
+            // 各要素を”output”に出力する
+            $("#output").html(htmlElements);
+            $("#output2").html(htmlElements);
+
+
+
+        });
+
+
+
+
+    </script>
+
+
+
+</body>
+
+</html>
